@@ -16,10 +16,27 @@ import { connectCloudinary } from "./config/cloudinary.js";
 const app = express();
 
 await connectCloudinary();
-// allow multiple origins
-const allowedOrigins = ["http://localhost:5173"];
-//middlewares
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+
+// allow multiple origins (local + deployed frontend)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://grocerease-4mgl.onrender.com"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like curl, Postman, or mobile apps)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
 app.use(cookieParser());
 app.use(express.json());
 
